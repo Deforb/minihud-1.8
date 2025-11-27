@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -23,26 +24,9 @@ import fi.dy.masa.minihud.config.Configs;
 
 public class RenderEventHandler
 {
-    public static final int MASK_COORDINATES    = 0x0001;
-    public static final int MASK_YAW            = 0x0002;
-    public static final int MASK_PITCH          = 0x0004;
-    public static final int MASK_SPEED          = 0x0008;
-    public static final int MASK_BIOME          = 0x0010;
-    public static final int MASK_LIGHT          = 0x0020;
-    public static final int MASK_FACING         = 0x0040;
-    public static final int MASK_BLOCK          = 0x0080;
-    public static final int MASK_CHUNK          = 0x0100;
-    public static final int MASK_LOOKINGAT      = 0x0200;
-    public static final int MASK_FPS            = 0x0400;
-    public static final int MASK_ENTITIES       = 0x0800;
-    public static final int MASK_TIME_REAL      = 0x1000;
-    public static final int MASK_TIME_WORLD     = 0x2000;
-    public static final int MASK_MEMORY         = 0x4000;
-
     private static RenderEventHandler instance;
     private final Minecraft mc;
     private boolean enabled = true;
-    private int mask;
     private int fps;
     private int fpsCounter;
     private long fpsUpdateTime = System.currentTimeMillis();
@@ -86,7 +70,7 @@ public class RenderEventHandler
 
         List<StringHolder> lines = new ArrayList<StringHolder>();
 
-        this.getLines(lines, this.mask);
+        this.getLines(lines);
 
         if (Configs.sortLinesByLength == true)
         {
@@ -111,22 +95,12 @@ public class RenderEventHandler
         return instance;
     }
 
-    public void setEnabledMask(int mask)
-    {
-        this.mask = mask;
-    }
-
-    public void xorEnabledMask(int mask)
-    {
-        this.mask ^= mask;
-    }
-
     public void toggleEnabled()
     {
         this.enabled = ! this.enabled;
     }
 
-    private void getLines(List<StringHolder> lines, int enabledMask)
+    private void getLines(List<StringHolder> lines)
     {
         Entity entity = this.mc.getRenderViewEntity();
         BlockPos pos = new BlockPos(entity.posX, entity.getEntityBoundingBox().minY, entity.posZ);
@@ -140,12 +114,12 @@ public class RenderEventHandler
             this.fpsCounter = 0;
         }
 
-        if ((enabledMask & MASK_FPS) != 0)
+        if (Configs.showFPS)
         {
-            lines.add(new StringHolder(String.format("%d fps", this.fps)));
+            lines.add(new StringHolder(I18n.format("minihud.format.fps", this.fps)));
         }
 
-        if ((enabledMask & MASK_COORDINATES) != 0)
+        if (Configs.showCoordinates)
         {
             if (Configs.coordinateFormatCustomized == true)
             {
@@ -159,73 +133,73 @@ public class RenderEventHandler
             }
             else
             {
-                lines.add(new StringHolder(String.format("XYZ: %.4f / %.4f / %.4f",
-                    entity.posX, entity.getEntityBoundingBox().minY, entity.posZ)));
+                lines.add(new StringHolder(I18n.format("minihud.format.coordinates",
+                    String.format("%.4f", entity.posX), String.format("%.4f", entity.getEntityBoundingBox().minY), String.format("%.4f", entity.posZ))));
             }
         }
 
-        if ((enabledMask & MASK_BLOCK) != 0)
+        if (Configs.showBlockPos)
         {
-            lines.add(new StringHolder(String.format("Block: %d / %d / %d", pos.getX(), pos.getY(), pos.getZ())));
+            lines.add(new StringHolder(I18n.format("minihud.format.block", pos.getX(), pos.getY(), pos.getZ())));
         }
 
-        if ((enabledMask & MASK_CHUNK) != 0)
+        if (Configs.showChunkPos)
         {
-            lines.add(new StringHolder(String.format("Block: %d %d %d in Chunk: %d %d %d",
+            lines.add(new StringHolder(I18n.format("minihud.format.chunk",
                     pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF,
                     pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4)));
         }
 
-        int yawPitchSpeed = enabledMask & (MASK_PITCH | MASK_YAW | MASK_SPEED);
-
-        if (yawPitchSpeed != 0)
+        if (Configs.showYaw || Configs.showPitch || Configs.showSpeed)
         {
             String pre = "";
             StringBuilder str = new StringBuilder(128);
 
-            if ((yawPitchSpeed & MASK_YAW) != 0)
+            if (Configs.showYaw)
             {
-                str.append(String.format("%syaw: %.1f", pre, MathHelper.wrapAngleTo180_float(entity.rotationYaw)));
+                str.append(I18n.format("minihud.format.yaw", String.format("%.1f", MathHelper.wrapAngleTo180_float(entity.rotationYaw))));
                 pre = " / ";
             }
 
-            if ((yawPitchSpeed & MASK_PITCH) != 0)
+            if (Configs.showPitch)
             {
-                str.append(String.format("%spitch: %.1f", pre, MathHelper.wrapAngleTo180_float(entity.rotationPitch)));
+                if (pre.length() > 0) str.append(pre);
+                str.append(I18n.format("minihud.format.pitch", String.format("%.1f", MathHelper.wrapAngleTo180_float(entity.rotationPitch))));
                 pre = " / ";
             }
 
-            if ((yawPitchSpeed & MASK_SPEED) != 0)
+            if (Configs.showSpeed)
             {
                 double dx = entity.posX - entity.lastTickPosX;
                 double dy = entity.posY - entity.lastTickPosY;
                 double dz = entity.posZ - entity.lastTickPosZ;
                 double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                str.append(String.format("%sspeed: %.3f m/s", pre, dist * 20));
+                if (pre.length() > 0) str.append(pre);
+                str.append(I18n.format("minihud.format.speed", String.format("%.3f", dist * 20)));
                 pre = " / ";
             }
 
             lines.add(new StringHolder(str.toString()));
         }
 
-        if ((enabledMask & MASK_FACING) != 0)
+        if (Configs.showFacing)
         {
             EnumFacing facing = entity.getHorizontalFacing();
-            String str = "Invalid";
+            String str = I18n.format("minihud.facing.invalid");
 
             switch (facing)
             {
-                case NORTH: str = "Negative Z"; break;
-                case SOUTH: str = "Positive Z"; break;
-                case WEST:  str = "Negative X"; break;
-                case EAST:  str = "Positive X"; break;
+                case NORTH: str = I18n.format("minihud.facing.north"); break;
+                case SOUTH: str = I18n.format("minihud.facing.south"); break;
+                case WEST:  str = I18n.format("minihud.facing.west"); break;
+                case EAST:  str = I18n.format("minihud.facing.east"); break;
                 default:
             }
 
-            lines.add(new StringHolder(String.format("Facing: %s (%s)", facing, str)));
+            lines.add(new StringHolder(I18n.format("minihud.format.facing", facing, str)));
         }
 
-        if ((enabledMask & (MASK_BIOME | MASK_LIGHT)) != 0)
+        if (Configs.showBiome || Configs.showLight)
         {
             // Prevent a crash when outside of world
             if (pos.getY() >= 0 && pos.getY() < 256 && this.mc.theWorld.isBlockLoaded(pos) == true)
@@ -234,22 +208,23 @@ public class RenderEventHandler
 
                 if (chunk.isEmpty() == false)
                 {
-                    if ((enabledMask & MASK_BIOME) != 0)
+                    if (Configs.showBiome)
                     {
-                        lines.add(new StringHolder("Biome: " + chunk.getBiome(pos, this.mc.theWorld.getWorldChunkManager()).biomeName));
+                        lines.add(new StringHolder(I18n.format("minihud.format.biome", chunk.getBiome(pos, this.mc.theWorld.getWorldChunkManager()).biomeName)));
                     }
 
-                    if ((enabledMask & MASK_LIGHT) != 0)
+                    if (Configs.showLight)
                     {
-                        lines.add(new StringHolder("Light: " + chunk.getLightSubtracted(pos, 0) +
-                                " (" + chunk.getLightFor(EnumSkyBlock.SKY, pos) + " sky, " +
-                                chunk.getLightFor(EnumSkyBlock.BLOCK, pos) + " block)"));
+                        lines.add(new StringHolder(I18n.format("minihud.format.light",
+                                chunk.getLightSubtracted(pos, 0),
+                                chunk.getLightFor(EnumSkyBlock.SKY, pos),
+                                chunk.getLightFor(EnumSkyBlock.BLOCK, pos))));
                     }
                 }
             }
         }
 
-        if ((enabledMask & MASK_ENTITIES) != 0)
+        if (Configs.showEntities)
         {
             String ent = this.mc.renderGlobal.getDebugInfoEntities();
 
@@ -262,34 +237,34 @@ public class RenderEventHandler
             lines.add(new StringHolder(ent));
         }
 
-        if ((enabledMask & MASK_TIME_REAL) != 0)
+        if (Configs.showRealTime)
         {
-            lines.add(new StringHolder("Time: " + new SimpleDateFormat(Configs.dateFormatReal).format(new Date())));
+            lines.add(new StringHolder(I18n.format("minihud.format.time_real", new SimpleDateFormat(Configs.dateFormatReal).format(new Date()))));
         }
 
-        if ((enabledMask & MASK_TIME_WORLD) != 0)
+        if (Configs.showWorldTime)
         {
-            lines.add(new StringHolder(String.format("Day: %d", this.mc.theWorld.getWorldTime() / 24000L)));
+            lines.add(new StringHolder(I18n.format("minihud.format.time_world", this.mc.theWorld.getWorldTime() / 24000L)));
         }
 
-        if ((enabledMask & MASK_MEMORY) != 0)
+        if (Configs.showMemory)
         {
             long max = Runtime.getRuntime().maxMemory();
             long total = Runtime.getRuntime().totalMemory();
             long free = Runtime.getRuntime().freeMemory();
             long used = total - free;
 
-            lines.add(new StringHolder(String.format("Mem: %d%% %d/%dMB", used * 100L / max, used / 1024 / 1024, max / 1024 / 1024)));
+            lines.add(new StringHolder(I18n.format("minihud.format.memory", used * 100L / max, used / 1024 / 1024, max / 1024 / 1024)));
         }
 
-        if ((enabledMask & MASK_LOOKINGAT) != 0)
+        if (Configs.showLookingAt)
         {
             if (this.mc.objectMouseOver != null &&
                 this.mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK &&
                 this.mc.objectMouseOver.getBlockPos() != null)
             {
                 BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
-                lines.add(new StringHolder(String.format("Looking at: %d %d %d", lookPos.getX(), lookPos.getY(), lookPos.getZ())));
+                lines.add(new StringHolder(I18n.format("minihud.format.looking_at", lookPos.getX(), lookPos.getY(), lookPos.getZ())));
             }
         }
     }
@@ -298,9 +273,9 @@ public class RenderEventHandler
     {
         GlStateManager.pushMatrix();
 
-        if (Configs.useScaledFont == true)
+        if (Configs.fontScale != 1.0f)
         {
-            GlStateManager.scale(0.5, 0.5, 0.5);
+            GlStateManager.scale(Configs.fontScale, Configs.fontScale, Configs.fontScale);
         }
 
         FontRenderer fontRenderer = this.mc.fontRendererObj;
