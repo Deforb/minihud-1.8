@@ -6,7 +6,7 @@ category.minihud=Mini HUD
 minihud.key.togglemode=Toggle Mode
 
 minihud.format.fps=%s fps
-minihud.format.coordinates=XYZ: %s / %s / %s
+minihud.format.coordinates=x: %s y: %s z: %s
 minihud.format.block=Block: %d / %d / %d
 minihud.format.chunk=Block: %d %d %d in Chunk: %d %d %d
 minihud.format.yaw=yaw: %s
@@ -54,7 +54,11 @@ minihud.config.prop.info_entities=Show Entity Count
 minihud.config.prop.info_time_real=Show Real Time
 minihud.config.prop.info_time_world=Show World Time
 minihud.config.prop.info_memory=Show Memory Usage
-minihud.config.prop.coordinate_format.tooltip=The format string for the coordinate line (needs to have three %f format strings!) Default: XYZ: %.4f / %.4f / %.4f
+minihud.config.prop.show_coordinates_scaled=Show Scaled Coordinates
+minihud.dimension.overworld=Overworld
+minihud.dimension.nether=Nether
+
+minihud.config.prop.coordinate_format.tooltip=The format string for the coordinate line (needs to have three %f format strings!) Default: XYZ: %.1f / %.1f / %.1f
 minihud.config.prop.date_format_real.tooltip=The format string for the real time (Java SimpleDateFormat) Default: HH:mm:ss
 minihud.config.prop.coordinate_format_customized.tooltip=Use the customized coordinate format string
 minihud.config.prop.font_color.tooltip=Font color (default: 0xE0E0E0 = 14737632)
@@ -81,3 +85,4 @@ minihud.config.prop.info_entities.tooltip=Show the entity count
 minihud.config.prop.info_time_real.tooltip=Show real world time
 minihud.config.prop.info_time_world.tooltip=Show Minecraft world time
 minihud.config.prop.info_memory.tooltip=Show memory usage
+minihud.config.prop.show_coordinates_scaled.tooltip=Show scaled coordinates (Nether <-> Overworld)

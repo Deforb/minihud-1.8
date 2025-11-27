@@ -15,6 +15,7 @@ public class Configs
     public static boolean sortLinesByLength;
     public static boolean sortLinesReversed;
     public static boolean coordinateFormatCustomized;
+    public static boolean showCoordinatesScaled;
     public static boolean useFontShadow;
     public static float fontScale;
     public static boolean useTextBackground;
@@ -88,9 +89,9 @@ public class Configs
             conf.getCategory(CATEGORY_GENERIC).remove("useScaledFont");
         }
 
-        prop = conf.get(CATEGORY_GENERIC, "coordinateFormat", "XYZ: %.4f / %.4f / %.4f");
+        prop = conf.get(CATEGORY_GENERIC, "coordinateFormat", "x: %.1f y: %.1f z: %.1f");
         prop.setLanguageKey("minihud.config.prop.coordinate_format");
-        prop.comment = "The format string for the coordinate line (needs to have three %f format strings!) Default: XYZ: %.4f / %.4f / %.4f";
+        prop.comment = "The format string for the coordinate line (needs to have three %f format strings!) Default: x: %.1f y: %.1f z: %.1f";
         coordinateFormat = prop.getString();
 
         prop = conf.get(CATEGORY_GENERIC, "dateFormatReal", "HH:mm:ss");
@@ -102,6 +103,11 @@ public class Configs
         prop.setLanguageKey("minihud.config.prop.coordinate_format_customized");
         prop.comment = "Use the customized coordinate format string";
         coordinateFormatCustomized = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_GENERIC, "showCoordinatesScaled", false);
+        prop.setLanguageKey("minihud.config.prop.show_coordinates_scaled");
+        prop.comment = "Show scaled coordinates (Nether <-> Overworld)";
+        showCoordinatesScaled = prop.getBoolean();
 
         prop = conf.get(CATEGORY_GENERIC, "fontColor", "0xE0E0E0");
         prop.setLanguageKey("minihud.config.prop.font_color");

@@ -121,20 +121,46 @@ public class RenderEventHandler
 
         if (Configs.showCoordinates)
         {
+            String coordsText = null;
+
             if (Configs.coordinateFormatCustomized == true)
             {
                 try
                 {
-                    lines.add(new StringHolder(String.format(Configs.coordinateFormat,
-                        entity.posX, entity.getEntityBoundingBox().minY, entity.posZ)));
+                    coordsText = String.format(Configs.coordinateFormat,
+                        entity.posX, entity.getEntityBoundingBox().minY, entity.posZ);
                 }
                 // Uh oh, someone done goofed their format string... :P
                 catch (Exception e) { }
             }
             else
             {
-                lines.add(new StringHolder(I18n.format("minihud.format.coordinates",
-                    String.format("%.4f", entity.posX), String.format("%.4f", entity.getEntityBoundingBox().minY), String.format("%.4f", entity.posZ))));
+                coordsText = I18n.format("minihud.format.coordinates",
+                    String.format("%.1f", entity.posX),
+                    String.format("%.1f", entity.getEntityBoundingBox().minY),
+                    String.format("%.1f", entity.posZ));
+            }
+
+            if (coordsText != null)
+            {
+                if (Configs.showCoordinatesScaled)
+                {
+                    int dim = entity.worldObj.provider.getDimensionId();
+                    if (dim == -1)
+                    {
+                        coordsText += String.format(" / %s: x: %.1f y: %.1f z: %.1f",
+                                I18n.format("minihud.dimension.overworld"),
+                                entity.posX * 8.0, entity.getEntityBoundingBox().minY, entity.posZ * 8.0);
+                    }
+                    else if (dim == 0)
+                    {
+                        coordsText += String.format(" / %s: x: %.1f y: %.1f z: %.1f",
+                                I18n.format("minihud.dimension.nether"),
+                                entity.posX / 8.0, entity.getEntityBoundingBox().minY, entity.posZ / 8.0);
+                    }
+                }
+
+                lines.add(new StringHolder(coordsText));
             }
         }
 

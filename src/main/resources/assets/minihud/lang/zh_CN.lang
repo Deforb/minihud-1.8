@@ -6,7 +6,7 @@ category.minihud=迷你HUD
 minihud.key.togglemode=切换模式
 
 minihud.format.fps=%s FPS
-minihud.format.coordinates=XYZ: %s / %s / %s
+minihud.format.coordinates=x: %s y: %s z: %s
 minihud.format.block=方块: %d / %d / %d
 minihud.format.chunk=方块: %d %d %d 区块: %d %d %d
 minihud.format.yaw=水平角度: %s
@@ -54,7 +54,11 @@ minihud.config.prop.info_entities=显示可见/加载实体数量
 minihud.config.prop.info_time_real=显示现实时间
 minihud.config.prop.info_time_world=显示游戏时间
 minihud.config.prop.info_memory=显示内存使用
-minihud.config.prop.coordinate_format.tooltip=坐标行的格式字符串（需要包含三个 %f 格式字符串！）默认值：XYZ: %.4f / %.4f / %.4f
+minihud.config.prop.show_coordinates_scaled=显示缩放坐标
+minihud.dimension.overworld=主世界
+minihud.dimension.nether=下界
+
+minihud.config.prop.coordinate_format.tooltip=坐标行的格式字符串（需要包含三个 %f 格式字符串！）默认值：XYZ: %.1f / %.1f / %.1f
 minihud.config.prop.date_format_real.tooltip=实时时间的格式字符串（Java SimpleDateFormat）默认值：HH:mm:ss
 minihud.config.prop.coordinate_format_customized.tooltip=使用自定义的坐标格式字符串
 minihud.config.prop.font_color.tooltip=字体颜色（默认值：0xE0E0E0 = 14737632）
@@ -81,3 +85,4 @@ minihud.config.prop.info_entities.tooltip=显示实体数量
 minihud.config.prop.info_time_real.tooltip=显示现实世界时间
 minihud.config.prop.info_time_world.tooltip=显示 Minecraft 世界时间
 minihud.config.prop.info_memory.tooltip=显示内存使用情况
+minihud.config.prop.show_coordinates_scaled.tooltip=显示缩放后的坐标 (下界 <-> 主世界)
