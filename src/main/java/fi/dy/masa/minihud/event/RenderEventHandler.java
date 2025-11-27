@@ -2,7 +2,9 @@ package fi.dy.masa.minihud.event;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.text.SimpleDateFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -33,14 +35,17 @@ public class RenderEventHandler
     public static final int MASK_LOOKINGAT      = 0x0200;
     public static final int MASK_FPS            = 0x0400;
     public static final int MASK_ENTITIES       = 0x0800;
+    public static final int MASK_TIME_REAL      = 0x1000;
+    public static final int MASK_TIME_WORLD     = 0x2000;
+    public static final int MASK_MEMORY         = 0x4000;
 
     private static RenderEventHandler instance;
     private final Minecraft mc;
-    private boolean enabled;
+    private boolean enabled = true;
     private int mask;
     private int fps;
     private int fpsCounter;
-    private long fpsUpdateTime = Minecraft.getSystemTime();
+    private long fpsUpdateTime = System.currentTimeMillis();
 
     private class StringHolder implements Comparable<StringHolder>
     {
@@ -128,7 +133,7 @@ public class RenderEventHandler
 
         this.fpsCounter++;
 
-        while (Minecraft.getSystemTime() >= this.fpsUpdateTime + 1000L)
+        while (System.currentTimeMillis() >= this.fpsUpdateTime + 1000L)
         {
             this.fps = this.fpsCounter;
             this.fpsUpdateTime += 1000L;
@@ -255,6 +260,26 @@ public class RenderEventHandler
             }
 
             lines.add(new StringHolder(ent));
+        }
+
+        if ((enabledMask & MASK_TIME_REAL) != 0)
+        {
+            lines.add(new StringHolder("Time: " + new SimpleDateFormat(Configs.dateFormatReal).format(new Date())));
+        }
+
+        if ((enabledMask & MASK_TIME_WORLD) != 0)
+        {
+            lines.add(new StringHolder(String.format("Day: %d", this.mc.theWorld.getWorldTime() / 24000L)));
+        }
+
+        if ((enabledMask & MASK_MEMORY) != 0)
+        {
+            long max = Runtime.getRuntime().maxMemory();
+            long total = Runtime.getRuntime().totalMemory();
+            long free = Runtime.getRuntime().freeMemory();
+            long used = total - free;
+
+            lines.add(new StringHolder(String.format("Mem: %d%% %d/%dMB", used * 100L / max, used / 1024 / 1024, max / 1024 / 1024)));
         }
 
         if ((enabledMask & MASK_LOOKINGAT) != 0)

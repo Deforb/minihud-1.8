@@ -26,6 +26,7 @@ public class Configs
     public static int textPosY;
 
     public static String coordinateFormat;
+    public static String dateFormatReal;
 
     public static File configurationFile;
     public static Configuration config;
@@ -61,12 +62,16 @@ public class Configs
         prop.comment = "The format string for the coordinate line (needs to have three %f format strings!) Default: XYZ: %.4f / %.4f / %.4f";
         coordinateFormat = prop.getString();
 
+        prop = conf.get(CATEGORY_GENERIC, "dateFormatReal", "HH:mm:ss");
+        prop.comment = "The format string for the real time (Java SimpleDateFormat) Default: HH:mm:ss";
+        dateFormatReal = prop.getString();
+
         prop = conf.get(CATEGORY_GENERIC, "coordinateFormatCustomized", false);
         prop.comment = "Use the customized coordinate format string";
         coordinateFormatCustomized = prop.getBoolean();
 
         prop = conf.get(CATEGORY_GENERIC, "defaultMode", 1);
-        prop.comment = "Bit mask of the enabled information. 1 = coordinates, 2 = yaw, 4 = pitch, 8 = speed, 16 = biome, 32 = light, 64 = facing, 128 = block, 256 = chunk, 512 = looking at, 1024 = fps, 2048 = entity count (sum together the ones you want enabled by default)";
+        prop.comment = "Bit mask of the enabled information. 1 = coordinates, 2 = yaw, 4 = pitch, 8 = speed, 16 = biome, 32 = light, 64 = facing, 128 = block, 256 = chunk, 512 = looking at, 1024 = fps, 2048 = entity count, 4096 = real time, 8192 = world time, 16384 = memory usage (sum together the ones you want enabled by default)";
         defaultModeNumeric = prop.getInt();
 
         prop = conf.get(CATEGORY_GENERIC, "defaultModeNumeric", false);
@@ -158,6 +163,18 @@ public class Configs
         prop = conf.get(CATEGORY_INFO_TOGGLE, "infoEntities", false);
         prop.comment = "Show the entity count";
         setInfoType(RenderEventHandler.MASK_ENTITIES, prop.getBoolean());
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoTimeReal", false);
+        prop.comment = "Show real world time";
+        setInfoType(RenderEventHandler.MASK_TIME_REAL, prop.getBoolean());
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoTimeWorld", false);
+        prop.comment = "Show Minecraft world time";
+        setInfoType(RenderEventHandler.MASK_TIME_WORLD, prop.getBoolean());
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoMemory", false);
+        prop.comment = "Show memory usage";
+        setInfoType(RenderEventHandler.MASK_MEMORY, prop.getBoolean());
 
         if (defaultMoDeNumericEnabled == true)
         {

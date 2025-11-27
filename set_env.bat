@@ -1,0 +1,1 @@
+set JAVA_HOME=E:\Work\Java\temurin-jdk-8
