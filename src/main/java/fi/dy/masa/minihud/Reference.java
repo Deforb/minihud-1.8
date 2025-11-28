@@ -11,4 +11,6 @@ public class Reference
     public static final String KEYBIND_CATEGORY_MINIHUD = "category." + Reference.MOD_ID;
     public static final String KEYBIND_NAME_TOGGLE_MODE = Reference.MOD_ID + ".key.togglemode";
     public static final int DEFAULT_KEYBIND_TOGGLE_MODE = Keyboard.KEY_H;
+    public static final String KEYBIND_NAME_LIGHT_LEVEL_OVERLAY = Reference.MOD_ID + ".key.lightleveloverlay";
+    public static final int DEFAULT_KEYBIND_LIGHT_LEVEL_OVERLAY = Keyboard.KEY_F8;
 }

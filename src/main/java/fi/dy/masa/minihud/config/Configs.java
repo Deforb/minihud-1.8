@@ -35,6 +35,7 @@ public class Configs
     public static boolean showRealTime;
     public static boolean showGameTime;
     public static boolean showMemory;
+    public static boolean lightLevelOverlayEnabled;
 
     public static int fontColor;
     public static int textBackgroundColor;
@@ -234,6 +235,11 @@ public class Configs
         prop.setLanguageKey("minihud.config.prop.info_looking_at");
         prop.comment = "Show which block the player is looking at";
         showLookingAt = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_GENERIC, "lightLevelOverlayEnabled", false);
+        prop.setLanguageKey("minihud.config.prop.light_level_overlay_enabled");
+        prop.comment = "Show light level overlay on blocks";
+        lightLevelOverlayEnabled = prop.getBoolean();
 
         if (conf.hasChanged() == true)
         {

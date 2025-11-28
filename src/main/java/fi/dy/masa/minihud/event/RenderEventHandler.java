@@ -19,7 +19,9 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.opengl.GL11;
 import fi.dy.masa.minihud.config.Configs;
 
 public class RenderEventHandler
@@ -334,6 +336,76 @@ public class RenderEventHandler
             yOff += fontRenderer.FONT_HEIGHT + 2;
         }
 
+        GlStateManager.popMatrix();
+    }
+
+    @SubscribeEvent
+    public void onRenderWorldLast(RenderWorldLastEvent event)
+    {
+        if (Configs.lightLevelOverlayEnabled == false)
+        {
+            return;
+        }
+
+        Entity entity = this.mc.getRenderViewEntity();
+        double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * event.partialTicks;
+        double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * event.partialTicks;
+        double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * event.partialTicks;
+
+        BlockPos pos = new BlockPos(entity.posX, entity.getEntityBoundingBox().minY, entity.posZ);
+        int range = 16;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-x, -y, -z);
+        
+        GlStateManager.disableLighting();
+        GlStateManager.disableDepth();
+        GlStateManager.enableTexture2D();
+
+        FontRenderer fontRenderer = this.mc.fontRendererObj;
+
+        for (int dx = -range; dx <= range; dx++)
+        {
+            for (int dy = -range; dy <= range; dy++)
+            {
+                for (int dz = -range; dz <= range; dz++)
+                {
+                    BlockPos p = pos.add(dx, dy, dz);
+                    if (this.mc.theWorld.isAirBlock(p) && this.mc.theWorld.isSideSolid(p.down(), EnumFacing.UP))
+                    {
+                        Chunk chunk = this.mc.theWorld.getChunkFromBlockCoords(p);
+                        int blockLight = chunk.getLightFor(EnumSkyBlock.BLOCK, p);
+                        
+                        String str = String.valueOf(blockLight);
+                        
+                        int color = 0xFFFFFF;
+                        if (blockLight <= 7) color = 0xFF0000;
+                        else if (blockLight < 14) color = 0xFFFF00;
+                        else color = 0x00FF00;
+
+                        this.renderTextAt(str, p.getX() + 0.5, p.getY() + 0.05, p.getZ() + 0.5, color, fontRenderer, entity);
+                    }
+                }
+            }
+        }
+
+        GlStateManager.enableDepth();
+        GlStateManager.enableLighting();
+        GlStateManager.popMatrix();
+    }
+
+    private void renderTextAt(String str, double x, double y, double z, int color, FontRenderer fontRenderer, Entity entity)
+    {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(x, y, z);
+        GlStateManager.rotate(-entity.rotationYaw, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(entity.rotationPitch, 1.0F, 0.0F, 0.0F);
+        float scale = 0.025F;
+        GlStateManager.scale(-scale, -scale, scale);
+        
+        int width = fontRenderer.getStringWidth(str);
+        fontRenderer.drawString(str, -width / 2, 0, color);
+        
         GlStateManager.popMatrix();
     }
 }

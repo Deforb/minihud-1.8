@@ -13,6 +13,7 @@ import fi.dy.masa.minihud.event.RenderEventHandler;
 public class ClientProxy extends CommonProxy
 {
     public static KeyBinding keyToggleMode;
+    public static KeyBinding keyLightLevelOverlay;
 
     @Override
     public void registerEventHandlers()
@@ -30,5 +31,11 @@ public class ClientProxy extends CommonProxy
                                        Reference.KEYBIND_CATEGORY_MINIHUD);
 
         ClientRegistry.registerKeyBinding(keyToggleMode);
+
+        keyLightLevelOverlay = new KeyBinding(Reference.KEYBIND_NAME_LIGHT_LEVEL_OVERLAY,
+                                              Reference.DEFAULT_KEYBIND_LIGHT_LEVEL_OVERLAY,
+                                              Reference.KEYBIND_CATEGORY_MINIHUD);
+
+        ClientRegistry.registerKeyBinding(keyLightLevelOverlay);
     }
 }
