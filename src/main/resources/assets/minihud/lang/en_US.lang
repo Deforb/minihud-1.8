@@ -21,7 +21,7 @@ minihud.facing.invalid=Invalid
 minihud.format.biome=Biome: %s
 minihud.format.light=Light: %d (%d sky, %d block)
 minihud.format.time_real=Time: %s
-minihud.format.game_time=MC time: (day %d) %02d:%02d
+minihud.format.game_time=MC time: (day %d) %s:%s
 minihud.format.memory=Mem: %d%% %d/%dMB
 minihud.format.looking_at=Looking at: %d %d %d
 

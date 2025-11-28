@@ -138,7 +138,7 @@ public class RenderEventHandler
             long hours = t / 1000L;
             long minutes = (t % 1000L) * 60L / 1000L;
 
-            lines.add(new StringHolder(I18n.format("minihud.format.game_time", day, hours, minutes)));
+            lines.add(new StringHolder(I18n.format("minihud.format.game_time", day, String.format("%02d", hours), String.format("%02d", minutes))));
         }
 
         if (Configs.showCoordinates)

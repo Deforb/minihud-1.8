@@ -88,6 +88,10 @@ public class Configs
         {
             conf.getCategory(CATEGORY_GENERIC).remove("useScaledFont");
         }
+        if (conf.hasKey(CATEGORY_INFO_TOGGLE, "infoTimeWorld"))
+        {
+            conf.getCategory(CATEGORY_INFO_TOGGLE).remove("infoTimeWorld");
+        }
 
         prop = conf.get(CATEGORY_GENERIC, "coordinateFormat", "x: %.1f y: %.1f z: %.1f");
         prop.setLanguageKey("minihud.config.prop.coordinate_format");
