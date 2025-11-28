@@ -156,10 +156,55 @@ public class Configs
 
         // Information types individual toggle
 
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoFPS", false);
+        prop.setLanguageKey("minihud.config.prop.info_fps");
+        prop.comment = "Show current FPS";
+        showFPS = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoMemory", false);
+        prop.setLanguageKey("minihud.config.prop.info_memory");
+        prop.comment = "Show memory usage";
+        showMemory = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoGameTime", false);
+        prop.setLanguageKey("minihud.config.prop.info_game_time");
+        prop.comment = "Show game time (day and time)";
+        showGameTime = prop.getBoolean();
+
         prop = conf.get(CATEGORY_INFO_TOGGLE, "infoCoordinates", false);
         prop.setLanguageKey("minihud.config.prop.info_coordinates");
         prop.comment = "Show player coordinates";
         showCoordinates = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoFacing", false);
+        prop.setLanguageKey("minihud.config.prop.info_facing");
+        prop.comment = "Show player facing";
+        showFacing = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoBiome", false);
+        prop.setLanguageKey("minihud.config.prop.info_biome");
+        prop.comment = "Show the current biome";
+        showBiome = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoEntities", false);
+        prop.setLanguageKey("minihud.config.prop.info_entities");
+        prop.comment = "Show the entity count";
+        showEntities = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoLightLevel", false);
+        prop.setLanguageKey("minihud.config.prop.info_light_level");
+        prop.comment = "Show the current light level";
+        showLight = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoBlockPosition", false);
+        prop.setLanguageKey("minihud.config.prop.info_block_position");
+        prop.comment = "Show player's block position";
+        showBlockPos = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoChunkPosition", false);
+        prop.setLanguageKey("minihud.config.prop.info_chunk_position");
+        prop.comment = "Show player's current position in the chunk";
+        showChunkPos = prop.getBoolean();
 
         prop = conf.get(CATEGORY_INFO_TOGGLE, "infoRotationYaw", false);
         prop.setLanguageKey("minihud.config.prop.info_rotation_yaw");
@@ -176,60 +221,15 @@ public class Configs
         prop.comment = "Show player moving speed";
         showSpeed = prop.getBoolean();
 
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoBiome", false);
-        prop.setLanguageKey("minihud.config.prop.info_biome");
-        prop.comment = "Show the current biome";
-        showBiome = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoLightLevel", false);
-        prop.setLanguageKey("minihud.config.prop.info_light_level");
-        prop.comment = "Show the current light level";
-        showLight = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoFacing", false);
-        prop.setLanguageKey("minihud.config.prop.info_facing");
-        prop.comment = "Show player facing";
-        showFacing = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoBlockPosition", false);
-        prop.setLanguageKey("minihud.config.prop.info_block_position");
-        prop.comment = "Show player's block position";
-        showBlockPos = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoChunkPosition", false);
-        prop.setLanguageKey("minihud.config.prop.info_chunk_position");
-        prop.comment = "Show player's current position in the chunk";
-        showChunkPos = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoLookingAt", false);
-        prop.setLanguageKey("minihud.config.prop.info_looking_at");
-        prop.comment = "Show which block the player is looking at";
-        showLookingAt = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoFPS", false);
-        prop.setLanguageKey("minihud.config.prop.info_fps");
-        prop.comment = "Show current FPS";
-        showFPS = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoEntities", false);
-        prop.setLanguageKey("minihud.config.prop.info_entities");
-        prop.comment = "Show the entity count";
-        showEntities = prop.getBoolean();
-
         prop = conf.get(CATEGORY_INFO_TOGGLE, "infoTimeReal", false);
         prop.setLanguageKey("minihud.config.prop.info_time_real");
         prop.comment = "Show real world time";
         showRealTime = prop.getBoolean();
 
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoGameTime", false);
-        prop.setLanguageKey("minihud.config.prop.info_game_time");
-        prop.comment = "Show game time (day and time)";
-        showGameTime = prop.getBoolean();
-
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoMemory", false);
-        prop.setLanguageKey("minihud.config.prop.info_memory");
-        prop.comment = "Show memory usage";
-        showMemory = prop.getBoolean();
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoLookingAt", false);
+        prop.setLanguageKey("minihud.config.prop.info_looking_at");
+        prop.comment = "Show which block the player is looking at";
+        showLookingAt = prop.getBoolean();
 
         if (conf.hasChanged() == true)
         {

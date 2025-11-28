@@ -119,6 +119,28 @@ public class RenderEventHandler
             lines.add(new StringHolder(I18n.format("minihud.format.fps", this.fps)));
         }
 
+        if (Configs.showMemory)
+        {
+            long max = Runtime.getRuntime().maxMemory();
+            long total = Runtime.getRuntime().totalMemory();
+            long free = Runtime.getRuntime().freeMemory();
+            long used = total - free;
+
+            lines.add(new StringHolder(I18n.format("minihud.format.memory", used * 100L / max, used / 1024 / 1024, max / 1024 / 1024)));
+        }
+
+        if (Configs.showGameTime)
+        {
+            long totalTime = this.mc.theWorld.getWorldTime();
+            long day = totalTime / 24000L;
+            long timeOfDay = totalTime % 24000L;
+            long t = (timeOfDay + 6000L) % 24000L;
+            long hours = t / 1000L;
+            long minutes = (t % 1000L) * 60L / 1000L;
+
+            lines.add(new StringHolder(I18n.format("minihud.format.game_time", day, hours, minutes)));
+        }
+
         if (Configs.showCoordinates)
         {
             String coordsText = null;
@@ -225,6 +247,17 @@ public class RenderEventHandler
             lines.add(new StringHolder(I18n.format("minihud.format.facing", facing, str)));
         }
 
+        if (Configs.showLookingAt)
+        {
+            if (this.mc.objectMouseOver != null &&
+                this.mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK &&
+                this.mc.objectMouseOver.getBlockPos() != null)
+            {
+                BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
+                lines.add(new StringHolder(I18n.format("minihud.format.looking_at", lookPos.getX(), lookPos.getY(), lookPos.getZ())));
+            }
+        }
+
         if (Configs.showBiome || Configs.showLight)
         {
             // Prevent a crash when outside of world
@@ -266,39 +299,6 @@ public class RenderEventHandler
         if (Configs.showRealTime)
         {
             lines.add(new StringHolder(I18n.format("minihud.format.time_real", new SimpleDateFormat(Configs.dateFormatReal).format(new Date()))));
-        }
-
-        if (Configs.showGameTime)
-        {
-            long totalTime = this.mc.theWorld.getWorldTime();
-            long day = totalTime / 24000L;
-            long timeOfDay = totalTime % 24000L;
-            long t = (timeOfDay + 6000L) % 24000L;
-            long hours = t / 1000L;
-            long minutes = (t % 1000L) * 60L / 1000L;
-
-            lines.add(new StringHolder(I18n.format("minihud.format.game_time", day, hours, minutes)));
-        }
-
-        if (Configs.showMemory)
-        {
-            long max = Runtime.getRuntime().maxMemory();
-            long total = Runtime.getRuntime().totalMemory();
-            long free = Runtime.getRuntime().freeMemory();
-            long used = total - free;
-
-            lines.add(new StringHolder(I18n.format("minihud.format.memory", used * 100L / max, used / 1024 / 1024, max / 1024 / 1024)));
-        }
-
-        if (Configs.showLookingAt)
-        {
-            if (this.mc.objectMouseOver != null &&
-                this.mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK &&
-                this.mc.objectMouseOver.getBlockPos() != null)
-            {
-                BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
-                lines.add(new StringHolder(I18n.format("minihud.format.looking_at", lookPos.getX(), lookPos.getY(), lookPos.getZ())));
-            }
         }
     }
 
