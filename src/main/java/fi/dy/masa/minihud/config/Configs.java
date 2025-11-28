@@ -33,7 +33,7 @@ public class Configs
     public static boolean showFPS;
     public static boolean showEntities;
     public static boolean showRealTime;
-    public static boolean showWorldTime;
+    public static boolean showGameTime;
     public static boolean showMemory;
 
     public static int fontColor;
@@ -221,10 +221,10 @@ public class Configs
         prop.comment = "Show real world time";
         showRealTime = prop.getBoolean();
 
-        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoTimeWorld", false);
-        prop.setLanguageKey("minihud.config.prop.info_time_world");
-        prop.comment = "Show Minecraft world time";
-        showWorldTime = prop.getBoolean();
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoGameTime", false);
+        prop.setLanguageKey("minihud.config.prop.info_game_time");
+        prop.comment = "Show game time (day and time)";
+        showGameTime = prop.getBoolean();
 
         prop = conf.get(CATEGORY_INFO_TOGGLE, "infoMemory", false);
         prop.setLanguageKey("minihud.config.prop.info_memory");

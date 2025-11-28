@@ -268,9 +268,16 @@ public class RenderEventHandler
             lines.add(new StringHolder(I18n.format("minihud.format.time_real", new SimpleDateFormat(Configs.dateFormatReal).format(new Date()))));
         }
 
-        if (Configs.showWorldTime)
+        if (Configs.showGameTime)
         {
-            lines.add(new StringHolder(I18n.format("minihud.format.time_world", this.mc.theWorld.getWorldTime() / 24000L)));
+            long totalTime = this.mc.theWorld.getWorldTime();
+            long day = totalTime / 24000L;
+            long timeOfDay = totalTime % 24000L;
+            long t = (timeOfDay + 6000L) % 24000L;
+            long hours = t / 1000L;
+            long minutes = (t % 1000L) * 60L / 1000L;
+
+            lines.add(new StringHolder(I18n.format("minihud.format.game_time", day, hours, minutes)));
         }
 
         if (Configs.showMemory)
