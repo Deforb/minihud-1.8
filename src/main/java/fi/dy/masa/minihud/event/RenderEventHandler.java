@@ -22,10 +22,16 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import fi.dy.masa.minihud.Reference;
 import fi.dy.masa.minihud.config.Configs;
 
 public class RenderEventHandler
 {
+    private static final ResourceLocation TEXTURE_LIGHT_LEVEL = new ResourceLocation(Reference.MOD_ID, "textures/misc/light_level_numbers.png");
     private static RenderEventHandler instance;
     private final Minecraft mc;
     private boolean enabled = true;
@@ -353,16 +359,19 @@ public class RenderEventHandler
         double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * event.partialTicks;
 
         BlockPos pos = new BlockPos(entity.posX, entity.getEntityBoundingBox().minY, entity.posZ);
-        int range = 16;
+        int range = 8; // smaller radius for performance
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(-x, -y, -z);
         
         GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
+        // GlStateManager.disableDepth(); // Removed to fix x-ray effect
+        GlStateManager.enableDepth(); // Ensure depth testing is enabled
         GlStateManager.enableTexture2D();
-
-        FontRenderer fontRenderer = this.mc.fontRendererObj;
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        
+        this.mc.getTextureManager().bindTexture(TEXTURE_LIGHT_LEVEL);
 
         for (int dx = -range; dx <= range; dx++)
         {
@@ -376,35 +385,61 @@ public class RenderEventHandler
                         Chunk chunk = this.mc.theWorld.getChunkFromBlockCoords(p);
                         int blockLight = chunk.getLightFor(EnumSkyBlock.BLOCK, p);
                         
-                        String str = String.valueOf(blockLight);
-                        
                         int color = 0xFFFFFF;
                         if (blockLight <= 7) color = 0xFF0000;
                         else if (blockLight < 14) color = 0xFFFF00;
                         else color = 0x00FF00;
 
-                        this.renderTextAt(str, p.getX() + 0.5, p.getY() + 0.05, p.getZ() + 0.5, color, fontRenderer, entity);
+                        // Offset to center the number (assuming sprite is in top-left)
+                        this.renderNumberTextureAt(blockLight, p.getX() + 0.75, p.getY() + 0.05, p.getZ() + 0.8, color, entity);
                     }
                 }
             }
         }
 
+        GlStateManager.disableBlend();
         GlStateManager.enableDepth();
         GlStateManager.enableLighting();
         GlStateManager.popMatrix();
     }
 
-    private void renderTextAt(String str, double x, double y, double z, int color, FontRenderer fontRenderer, Entity entity)
+    private void renderNumberTextureAt(int number, double x, double y, double z, int color, Entity entity)
     {
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
-        GlStateManager.rotate(-entity.rotationYaw, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(entity.rotationPitch, 1.0F, 0.0F, 0.0F);
-        float scale = 0.025F;
-        GlStateManager.scale(-scale, -scale, scale);
         
-        int width = fontRenderer.getStringWidth(str);
-        fontRenderer.drawString(str, -width / 2, 0, color);
+        // No rotation (flat on block)
+        // No scaling (use size directly)
+        
+        float r = (float)((color >> 16) & 255) / 255.0F;
+        float g = (float)((color >> 8) & 255) / 255.0F;
+        float b = (float)(color & 255) / 255.0F;
+        GlStateManager.color(r, g, b, 1.0F);
+
+        int col = number % 4;
+        int row = number / 4;
+        float uMin = col * 0.25F;
+        float uMax = uMin + 0.25F;
+        float vMin = row * 0.25F;
+        float vMax = vMin + 0.25F;
+
+        Tessellator tessellator = Tessellator.getInstance();
+        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+        
+        float size = 0.5F; // 1.0 block width
+        
+        // Draw flat on XZ plane (North is -Z)
+        // Bottom Left (-X, +Z)
+        worldrenderer.pos(-size, 0.0D, size).tex(uMin, vMax).endVertex();
+        // Bottom Right (+X, +Z)
+        worldrenderer.pos(size, 0.0D, size).tex(uMax, vMax).endVertex();
+        // Top Right (+X, -Z)
+        worldrenderer.pos(size, 0.0D, -size).tex(uMax, vMin).endVertex();
+        // Top Left (-X, -Z)
+        worldrenderer.pos(-size, 0.0D, -size).tex(uMin, vMin).endVertex();
+        
+        tessellator.draw();
         
         GlStateManager.popMatrix();
     }
