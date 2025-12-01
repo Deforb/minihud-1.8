@@ -390,8 +390,10 @@ public class RenderEventHandler
                         else if (blockLight < 14) color = 0xFFFF00;
                         else color = 0x00FF00;
 
-                        // Offset to center the number (assuming sprite is in top-left)
-                        this.renderNumberTextureAt(blockLight, p.getX() + 0.75, p.getY() + 0.05, p.getZ() + 0.8, color, entity);
+                        // Center of the block
+                        // Snap rotation to 90 degree steps
+                        float rotation = 180.0F - (float)(Math.round(entity.rotationYaw / 90.0) * 90.0);
+                        this.renderNumberTextureAt(blockLight, p.getX() + 0.5, p.getY() + 0.05, p.getZ() + 0.5, color, rotation);
                     }
                 }
             }
@@ -403,13 +405,16 @@ public class RenderEventHandler
         GlStateManager.popMatrix();
     }
 
-    private void renderNumberTextureAt(int number, double x, double y, double z, int color, Entity entity)
+    private void renderNumberTextureAt(int number, double x, double y, double z, int color, float rotation)
     {
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
         
-        // No rotation (flat on block)
-        // No scaling (use size directly)
+        // Rotate to face player
+        GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
+        
+        // Shift the quad to center the number (assuming number is in top-left of texture)
+        GlStateManager.translate(0.25, 0.0, 0.3);
         
         float r = (float)((color >> 16) & 255) / 255.0F;
         float g = (float)((color >> 8) & 255) / 255.0F;
