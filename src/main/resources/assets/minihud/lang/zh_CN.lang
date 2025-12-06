@@ -24,6 +24,7 @@ minihud.format.time_real=现实时间: %s
 minihud.format.game_time=MC time: (day %d) %s:%s
 minihud.format.memory=内存使用: %d%% %d/%dMB
 minihud.format.looking_at=看着的方块: %d %d %d
+minihud.format.valid_door=有效门: %s
 
 minihud.config.category.generic=通用设置
 minihud.config.category.info_types=信息类型

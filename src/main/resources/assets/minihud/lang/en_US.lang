@@ -24,6 +24,7 @@ minihud.format.time_real=Time: %s
 minihud.format.game_time=MC time: (day %d) %s:%s
 minihud.format.memory=Mem: %d%% %d/%dMB
 minihud.format.looking_at=Looking at: %d %d %d
+minihud.format.valid_door=Valid Door: %s
 
 minihud.config.category.generic=Generic
 minihud.config.category.info_types=Info Types

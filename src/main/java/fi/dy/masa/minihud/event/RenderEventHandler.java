@@ -5,16 +5,26 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.text.SimpleDateFormat;
+import org.lwjgl.input.Keyboard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.block.BlockDoor;
+import net.minecraft.world.World;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -32,6 +42,7 @@ import fi.dy.masa.minihud.config.Configs;
 public class RenderEventHandler
 {
     private static final ResourceLocation TEXTURE_LIGHT_LEVEL = new ResourceLocation(Reference.MOD_ID, "textures/misc/light_level_numbers.png");
+    private static final ResourceLocation TEXTURE_WIDGETS = new ResourceLocation("textures/gui/container/generic_54.png");
     private static RenderEventHandler instance;
     private final Minecraft mc;
     private boolean enabled = true;
@@ -91,6 +102,11 @@ public class RenderEventHandler
         }
 
         this.renderText(Configs.textPosX, Configs.textPosY, lines);
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_LMENU) || Keyboard.isKeyDown(Keyboard.KEY_RMENU))
+        {
+            this.renderContainerPreview(event.resolution.getScaledWidth(), event.resolution.getScaledHeight());
+        }
     }
 
     public static RenderEventHandler getInstance()
@@ -266,6 +282,18 @@ public class RenderEventHandler
             }
         }
 
+        if (this.mc.objectMouseOver != null &&
+            this.mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK &&
+            this.mc.objectMouseOver.getBlockPos() != null)
+        {
+            BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
+            if (this.mc.theWorld.getBlockState(lookPos).getBlock() instanceof BlockDoor)
+            {
+                boolean isValid = isVillageDoor(this.mc.theWorld, lookPos);
+                lines.add(new StringHolder(I18n.format("minihud.format.valid_door", isValid ? I18n.format("gui.yes") : I18n.format("gui.no"))));
+            }
+        }
+
         if (Configs.showBiome || Configs.showLight)
         {
             // Prevent a crash when outside of world
@@ -308,6 +336,145 @@ public class RenderEventHandler
         {
             lines.add(new StringHolder(I18n.format("minihud.format.time_real", new SimpleDateFormat(Configs.dateFormatReal).format(new Date()))));
         }
+    }
+
+    private void renderContainerPreview(int screenWidth, int screenHeight)
+    {
+        if (this.mc.objectMouseOver == null ||
+            this.mc.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
+            this.mc.objectMouseOver.getBlockPos() == null)
+        {
+            return;
+        }
+
+        BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
+        TileEntity te = this.mc.theWorld.getTileEntity(lookPos);
+
+        // In singleplayer, try to get the server-side TileEntity because client-side inventory is usually not synced until opened
+        if (this.mc.isSingleplayer())
+        {
+            try
+            {
+                MinecraftServer server = this.mc.getIntegratedServer();
+                if (server != null)
+                {
+                    WorldServer worldServer = server.worldServerForDimension(this.mc.theWorld.provider.getDimensionId());
+                    if (worldServer != null)
+                    {
+                        TileEntity serverTE = worldServer.getTileEntity(lookPos);
+                        if (serverTE instanceof IInventory)
+                        {
+                            te = serverTE;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // Ignore errors accessing server thread data
+            }
+        }
+
+        if (!(te instanceof IInventory))
+        {
+            return;
+        }
+
+        IInventory inv = (IInventory) te;
+        int invSize = inv.getSizeInventory();
+        
+        // Simple layout: 9 columns
+        int cols = 9;
+        int rows = (int) Math.ceil((double) invSize / cols);
+        
+        int slotSize = 18; // Standard slot size
+        int guiWidth = 176; // Standard GUI width
+        int guiHeight = rows * slotSize + 17; // Top padding (17) + slots
+        
+        int startX = (screenWidth - guiWidth) / 2;
+        int startY = (screenHeight - guiHeight) / 2;
+
+        // Draw background
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(TEXTURE_WIDGETS);
+        
+        // Draw top part (contains first row)
+        // The texture has 7 pixels padding on top, then slots.
+        // We need to draw the top border and the slots.
+        // generic_54.png:
+        // 0-176 width
+        // Top border is about 7 pixels? No, standard container is:
+        // Top 7 pixels padding, then slots.
+        // Side padding 7 pixels.
+        
+        // Let's just draw the top part of the texture which contains the slots.
+        // The texture is 256x256.
+        // The container part starts at (0,0).
+        // Width 176.
+        // Height depends on rows.
+        // For 6 rows (double chest), height is 222 (including player inventory).
+        // We just want the container slots.
+        // The slots are at:
+        // x: 7 + col * 18
+        // y: 17 + row * 18
+        // The top border is 17 pixels high.
+        // The bottom border (if we want to close it) is usually drawn from the bottom of the texture.
+        
+        // Draw the top part (including all slots)
+        // We can draw the top (rows * 18 + 17) pixels from the texture.
+        // But generic_54 only has 6 rows (3 rows * 2? No, it has 6 rows of slots).
+        // If we have more than 6 rows, we might have issues, but standard containers are max 54 slots (6 rows).
+        
+        int textureHeight = rows * 18 + 17;
+        this.mc.ingameGUI.drawTexturedModalRect(startX, startY, 0, 0, guiWidth, textureHeight);
+        
+        // Draw the bottom border (7 pixels high)
+        // We can take it from the bottom of the GUI texture (e.g. y=215 for 6 rows)
+        // Or just use the bottom of the inventory part.
+        // Let's use y=215 which is the bottom of the GUI in the texture.
+        this.mc.ingameGUI.drawTexturedModalRect(startX, startY + textureHeight, 0, 215, guiWidth, 7);
+
+        // Prepare for item rendering
+        RenderHelper.enableGUIStandardItemLighting();
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0, 0, 32.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.enableRescaleNormal();
+        GlStateManager.enableLighting();
+        
+        // Force full brightness to ensure items are visible
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+        
+        // Ensure Texture2D is enabled
+        GlStateManager.enableTexture2D();
+        
+        // Items need depth test to render correctly
+        GlStateManager.enableDepth();
+        
+        this.mc.getRenderItem().zLevel = 200.0F;
+        
+        for (int i = 0; i < invSize; i++)
+        {
+            ItemStack stack = inv.getStackInSlot(i);
+            if (stack != null)
+            {
+                int col = i % cols;
+                int row = i / cols;
+                int x = startX + 8 + col * slotSize; // 8 pixels padding from left
+                int y = startY + 18 + row * slotSize; // 18 pixels padding from top (17 + 1)
+                
+                this.mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
+                this.mc.getRenderItem().renderItemOverlays(this.mc.fontRendererObj, stack, x, y);
+            }
+        }
+        
+        this.mc.getRenderItem().zLevel = 0.0F;
+        
+        GlStateManager.disableDepth();
+        GlStateManager.popMatrix();
+        RenderHelper.disableStandardItemLighting();
+        GlStateManager.disableRescaleNormal();
+        GlStateManager.disableLighting();
     }
 
     private void renderText(int xOff, int yOff, List<StringHolder> lines)
@@ -447,5 +614,35 @@ public class RenderEventHandler
         tessellator.draw();
         
         GlStateManager.popMatrix();
+    }
+
+    private boolean isVillageDoor(World world, BlockPos pos)
+    {
+        EnumFacing enumfacing = BlockDoor.getFacing(world, pos);
+        EnumFacing enumfacing1 = enumfacing.getOpposite();
+        int i = this.countBlocksCanSeeSky(world, pos, enumfacing, 5);
+        int j = this.countBlocksCanSeeSky(world, pos, enumfacing1, i + 1);
+
+        return i != j;
+    }
+
+    private int countBlocksCanSeeSky(World world, BlockPos centerPos, EnumFacing direction, int limitation)
+    {
+        int i = 0;
+
+        for (int j = 1; j <= 5; ++j)
+        {
+            if (world.canSeeSky(centerPos.offset(direction, j)))
+            {
+                ++i;
+
+                if (i >= limitation)
+                {
+                    return i;
+                }
+            }
+        }
+
+        return i;
     }
 }
