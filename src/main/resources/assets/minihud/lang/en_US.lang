@@ -25,6 +25,7 @@ minihud.format.game_time=MC time: (day %d) %s:%s
 minihud.format.memory=Mem: %d%% %d/%dMB
 minihud.format.looking_at=Looking at: %d %d %d
 minihud.format.valid_door=Valid Door: %s
+minihud.format.valid_door_counts=Valid Door: %s (outside sky blocks: %d)
 
 minihud.config.category.generic=Generic
 minihud.config.category.info_types=Info Types
@@ -50,6 +51,7 @@ minihud.config.prop.info_facing=Show Facing
 minihud.config.prop.info_block_position=Show Block Position
 minihud.config.prop.info_chunk_position=Show Chunk Position
 minihud.config.prop.info_looking_at=Show Looking At
+minihud.config.prop.info_valid_door=Show Valid Door Status
 minihud.config.prop.info_fps=Show FPS
 minihud.config.prop.info_entities=Show Entity Count
 minihud.config.prop.info_time_real=Show Real Time

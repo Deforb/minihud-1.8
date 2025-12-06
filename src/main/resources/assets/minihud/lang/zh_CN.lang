@@ -25,6 +25,7 @@ minihud.format.game_time=MC time: (day %d) %s:%s
 minihud.format.memory=内存使用: %d%% %d/%dMB
 minihud.format.looking_at=看着的方块: %d %d %d
 minihud.format.valid_door=有效门: %s
+minihud.format.valid_door_counts=有效门: %s (两侧外部空间: %d)
 
 minihud.config.category.generic=通用设置
 minihud.config.category.info_types=信息类型
@@ -49,7 +50,8 @@ minihud.config.prop.info_light_level=显示光照等级
 minihud.config.prop.info_facing=显示朝向
 minihud.config.prop.info_block_position=显示玩家当前方块坐标
 minihud.config.prop.info_chunk_position=显示当前所在区块坐标
-minihud.config.prop.info_looking_at=显示注视的方块坐标
+minihud.config.prop.info_looking_at=显示看着的方块
+minihud.config.prop.info_valid_door=显示有效门状态
 minihud.config.prop.info_fps=显示 FPS
 minihud.config.prop.info_entities=显示可见/加载实体数量
 minihud.config.prop.info_time_real=显示现实时间

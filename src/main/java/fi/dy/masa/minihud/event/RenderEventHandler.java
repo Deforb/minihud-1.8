@@ -293,15 +293,28 @@ public class RenderEventHandler
             }
         }
 
-        if (this.mc.objectMouseOver != null &&
+        if (Configs.showValidDoor &&
+            this.mc.objectMouseOver != null &&
             this.mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK &&
             this.mc.objectMouseOver.getBlockPos() != null)
         {
             BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
             if (this.mc.theWorld.getBlockState(lookPos).getBlock() instanceof BlockDoor)
             {
-                boolean isValid = isVillageDoor(this.mc.theWorld, lookPos);
-                lines.add(new StringHolder(I18n.format("minihud.format.valid_door", isValid ? I18n.format("gui.yes") : I18n.format("gui.no"))));
+                EnumFacing enumfacing = BlockDoor.getFacing(this.mc.theWorld, lookPos);
+                EnumFacing enumfacing1 = enumfacing.getOpposite();
+                int countA = this.countBlocksCanSeeSky(this.mc.theWorld, lookPos, enumfacing, 5);
+                int countB = this.countBlocksCanSeeSky(this.mc.theWorld, lookPos, enumfacing1, countA + 1);
+                boolean isValid = countA != countB;
+
+                if (isValid)
+                {
+                    lines.add(new StringHolder(I18n.format("minihud.format.valid_door", I18n.format("gui.yes"))));
+                }
+                else
+                {
+                    lines.add(new StringHolder(I18n.format("minihud.format.valid_door_counts", I18n.format("gui.no"), countA)));
+                }
             }
         }
 
