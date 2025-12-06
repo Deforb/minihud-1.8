@@ -14,6 +14,13 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockChest;
+import net.minecraft.tileentity.TileEntityBrewingStand;
+import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.inventory.IInventory;
@@ -43,6 +50,10 @@ public class RenderEventHandler
 {
     private static final ResourceLocation TEXTURE_LIGHT_LEVEL = new ResourceLocation(Reference.MOD_ID, "textures/misc/light_level_numbers.png");
     private static final ResourceLocation TEXTURE_WIDGETS = new ResourceLocation("textures/gui/container/generic_54.png");
+    private static final ResourceLocation TEXTURE_FURNACE = new ResourceLocation("textures/gui/container/furnace.png");
+    private static final ResourceLocation TEXTURE_HOPPER = new ResourceLocation("textures/gui/container/hopper.png");
+    private static final ResourceLocation TEXTURE_DISPENSER = new ResourceLocation("textures/gui/container/dispenser.png");
+    private static final ResourceLocation TEXTURE_BREWING_STAND = new ResourceLocation("textures/gui/container/brewing_stand.png");
     private static RenderEventHandler instance;
     private final Minecraft mc;
     private boolean enabled = true;
@@ -350,7 +361,9 @@ public class RenderEventHandler
         BlockPos lookPos = this.mc.objectMouseOver.getBlockPos();
         TileEntity te = this.mc.theWorld.getTileEntity(lookPos);
 
-        // In singleplayer, try to get the server-side TileEntity because client-side inventory is usually not synced until opened
+        IInventory inv = null;
+
+        // Try to get the container
         if (this.mc.isSingleplayer())
         {
             try
@@ -361,10 +374,18 @@ public class RenderEventHandler
                     WorldServer worldServer = server.worldServerForDimension(this.mc.theWorld.provider.getDimensionId());
                     if (worldServer != null)
                     {
-                        TileEntity serverTE = worldServer.getTileEntity(lookPos);
-                        if (serverTE instanceof IInventory)
+                        Block block = worldServer.getBlockState(lookPos).getBlock();
+                        if (block instanceof BlockChest)
                         {
-                            te = serverTE;
+                            inv = ((BlockChest)block).getLockableContainer(worldServer, lookPos);
+                        }
+                        else
+                        {
+                            TileEntity serverTE = worldServer.getTileEntity(lookPos);
+                            if (serverTE instanceof IInventory)
+                            {
+                                inv = (IInventory) serverTE;
+                            }
                         }
                     }
                 }
@@ -375,64 +396,86 @@ public class RenderEventHandler
             }
         }
 
-        if (!(te instanceof IInventory))
+        if (inv == null)
+        {
+            Block block = this.mc.theWorld.getBlockState(lookPos).getBlock();
+            if (block instanceof BlockChest)
+            {
+                inv = ((BlockChest)block).getLockableContainer(this.mc.theWorld, lookPos);
+            }
+            else if (te instanceof IInventory)
+            {
+                inv = (IInventory) te;
+            }
+        }
+
+        if (inv == null)
         {
             return;
         }
 
-        IInventory inv = (IInventory) te;
         int invSize = inv.getSizeInventory();
         
-        // Simple layout: 9 columns
-        int cols = 9;
-        int rows = (int) Math.ceil((double) invSize / cols);
+        ResourceLocation texture = TEXTURE_WIDGETS;
+        int guiWidth = 176;
+        int containerHeight = 0;
+        List<int[]> slotPositions = new ArrayList<int[]>();
+
+        if (inv instanceof TileEntityFurnace)
+        {
+            texture = TEXTURE_FURNACE;
+            containerHeight = 71;
+            slotPositions.add(new int[]{56, 17}); // Input
+            slotPositions.add(new int[]{56, 53}); // Fuel
+            slotPositions.add(new int[]{116, 35}); // Output
+        }
+        else if (inv instanceof TileEntityHopper)
+        {
+            texture = TEXTURE_HOPPER;
+            containerHeight = 40;
+            for (int i = 0; i < 5; i++) slotPositions.add(new int[]{44 + i * 18, 20});
+        }
+        else if (inv instanceof TileEntityDispenser || inv instanceof TileEntityDropper)
+        {
+            texture = TEXTURE_DISPENSER;
+            containerHeight = 71;
+            for (int i = 0; i < 9; i++) slotPositions.add(new int[]{62 + (i % 3) * 18, 17 + (i / 3) * 18});
+        }
+        else if (inv instanceof TileEntityBrewingStand)
+        {
+            texture = TEXTURE_BREWING_STAND;
+            containerHeight = 71;
+            slotPositions.add(new int[]{56, 46}); // Bottle 1
+            slotPositions.add(new int[]{79, 53}); // Bottle 2
+            slotPositions.add(new int[]{102, 46}); // Bottle 3
+            slotPositions.add(new int[]{79, 17}); // Ingredient
+        }
+        else // Chests and others
+        {
+            int cols = 9;
+            int rows = invSize / 9;
+            containerHeight = rows * 18 + 17;
+            
+            for (int i = 0; i < invSize; i++)
+            {
+                int col = i % cols;
+                int row = i / cols;
+                slotPositions.add(new int[]{8 + col * 18, 18 + row * 18});
+            }
+        }
         
-        int slotSize = 18; // Standard slot size
-        int guiWidth = 176; // Standard GUI width
-        int guiHeight = rows * slotSize + 17; // Top padding (17) + slots
-        
+        int guiHeight = containerHeight + 7;
         int startX = (screenWidth - guiWidth) / 2;
         int startY = (screenHeight - guiHeight) / 2;
 
         // Draw background
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(texture);
+        this.mc.ingameGUI.drawTexturedModalRect(startX, startY, 0, 0, guiWidth, containerHeight);
+        
+        // Draw bottom border
         this.mc.getTextureManager().bindTexture(TEXTURE_WIDGETS);
-        
-        // Draw top part (contains first row)
-        // The texture has 7 pixels padding on top, then slots.
-        // We need to draw the top border and the slots.
-        // generic_54.png:
-        // 0-176 width
-        // Top border is about 7 pixels? No, standard container is:
-        // Top 7 pixels padding, then slots.
-        // Side padding 7 pixels.
-        
-        // Let's just draw the top part of the texture which contains the slots.
-        // The texture is 256x256.
-        // The container part starts at (0,0).
-        // Width 176.
-        // Height depends on rows.
-        // For 6 rows (double chest), height is 222 (including player inventory).
-        // We just want the container slots.
-        // The slots are at:
-        // x: 7 + col * 18
-        // y: 17 + row * 18
-        // The top border is 17 pixels high.
-        // The bottom border (if we want to close it) is usually drawn from the bottom of the texture.
-        
-        // Draw the top part (including all slots)
-        // We can draw the top (rows * 18 + 17) pixels from the texture.
-        // But generic_54 only has 6 rows (3 rows * 2? No, it has 6 rows of slots).
-        // If we have more than 6 rows, we might have issues, but standard containers are max 54 slots (6 rows).
-        
-        int textureHeight = rows * 18 + 17;
-        this.mc.ingameGUI.drawTexturedModalRect(startX, startY, 0, 0, guiWidth, textureHeight);
-        
-        // Draw the bottom border (7 pixels high)
-        // We can take it from the bottom of the GUI texture (e.g. y=215 for 6 rows)
-        // Or just use the bottom of the inventory part.
-        // Let's use y=215 which is the bottom of the GUI in the texture.
-        this.mc.ingameGUI.drawTexturedModalRect(startX, startY + textureHeight, 0, 215, guiWidth, 7);
+        this.mc.ingameGUI.drawTexturedModalRect(startX, startY + containerHeight, 0, 215, guiWidth, 7);
 
         // Prepare for item rendering
         RenderHelper.enableGUIStandardItemLighting();
@@ -453,15 +496,14 @@ public class RenderEventHandler
         
         this.mc.getRenderItem().zLevel = 200.0F;
         
-        for (int i = 0; i < invSize; i++)
+        for (int i = 0; i < invSize && i < slotPositions.size(); i++)
         {
             ItemStack stack = inv.getStackInSlot(i);
             if (stack != null)
             {
-                int col = i % cols;
-                int row = i / cols;
-                int x = startX + 8 + col * slotSize; // 8 pixels padding from left
-                int y = startY + 18 + row * slotSize; // 18 pixels padding from top (17 + 1)
+                int[] pos = slotPositions.get(i);
+                int x = startX + pos[0];
+                int y = startY + pos[1];
                 
                 this.mc.getRenderItem().renderItemAndEffectIntoGUI(stack, x, y);
                 this.mc.getRenderItem().renderItemOverlays(this.mc.fontRendererObj, stack, x, y);
