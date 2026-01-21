@@ -37,6 +37,7 @@ public class Configs
     public static boolean showMemory;
     public static boolean showValidDoor;
     public static boolean lightLevelOverlayEnabled;
+    public static boolean showVillagerTrades;
 
     public static int fontColor;
     public static int textBackgroundColor;
@@ -246,6 +247,11 @@ public class Configs
         prop.setLanguageKey("minihud.config.prop.light_level_overlay_enabled");
         prop.comment = "Show light level overlay on blocks";
         lightLevelOverlayEnabled = prop.getBoolean();
+
+        prop = conf.get(CATEGORY_INFO_TOGGLE, "infoVillagerTrades", true);
+        prop.setLanguageKey("minihud.config.prop.info_villager_trades");
+        prop.comment = "Show villager trades when viewing merchant GUI";
+        showVillagerTrades = prop.getBoolean();
 
         if (conf.hasChanged() == true)
         {

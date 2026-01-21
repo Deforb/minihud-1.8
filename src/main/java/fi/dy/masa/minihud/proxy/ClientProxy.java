@@ -9,6 +9,7 @@ import fi.dy.masa.minihud.Reference;
 import fi.dy.masa.minihud.config.Configs;
 import fi.dy.masa.minihud.event.InputEventHandler;
 import fi.dy.masa.minihud.event.RenderEventHandler;
+import fi.dy.masa.minihud.event.GuiScreenEventHandler;
 
 public class ClientProxy extends CommonProxy
 {
@@ -21,6 +22,7 @@ public class ClientProxy extends CommonProxy
         MinecraftForge.EVENT_BUS.register(new Configs());
         MinecraftForge.EVENT_BUS.register(new InputEventHandler());
         MinecraftForge.EVENT_BUS.register(RenderEventHandler.getInstance());
+        MinecraftForge.EVENT_BUS.register(GuiScreenEventHandler.getInstance());
     }
 
     @Override

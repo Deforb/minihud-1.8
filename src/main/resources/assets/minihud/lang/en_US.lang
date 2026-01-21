@@ -89,3 +89,6 @@ minihud.config.prop.info_time_real.tooltip=Show real world time
 minihud.config.prop.info_game_time.tooltip=Show game time (day and time)
 minihud.config.prop.info_memory.tooltip=Show memory usage
 minihud.config.prop.show_coordinates_scaled.tooltip=Show scaled coordinates (Nether <-> Overworld)
+minihud.config.prop.info_villager_trades=Show Villager Trades
+minihud.config.prop.info_villager_trades.tooltip=Show villager trades when viewing merchant GUI
+minihud.villager.trades=Trades (%d)

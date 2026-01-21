@@ -88,3 +88,6 @@ minihud.config.prop.info_entities.tooltip=显示可见/加载实体数量
 minihud.config.prop.info_time_real.tooltip=显示现实世界时间
 minihud.config.prop.info_game_time.tooltip=显示游戏内时间 (天数和时间)
 minihud.config.prop.info_memory.tooltip=显示内存使用情况
+minihud.config.prop.info_villager_trades=显示村民交易
+minihud.config.prop.info_villager_trades.tooltip=在查看村民交易界面时显示交易列表
+minihud.villager.trades=交易 (%d)
